@@ -12,3 +12,7 @@ func Atoi(s string) int {
 	}
 	return i
 }
+
+type Pt struct {
+	X, Y int
+}
