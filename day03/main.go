@@ -28,14 +28,25 @@ func main() {
 	height = y
 
 	// Part 1
+	fmt.Println(numTrees(3, 1, &m, width, height))
+
+	// Part 2
+	product := 1
+	for _, i := range []util.Pt{{1, 1}, {3, 1}, {5, 1}, {7, 1}, {1, 2}} {
+		product *= numTrees(i.X, i.Y, &m, width, height)
+	}
+	fmt.Println(product)
+}
+
+func numTrees(deltaX, deltaY int, m *map[util.Pt]bool, width, height int) int {
 	trees := 0
 	x, y := 0, 0
 	for y < height {
-		if m[util.Pt{x, y}] {
+		if (*m)[util.Pt{x, y}] {
 			trees++
 		}
-		y++
-		x = (x + 3) % width
+		y += deltaY
+		x = (x + deltaX) % width
 	}
-	fmt.Println(trees)
+	return trees
 }
