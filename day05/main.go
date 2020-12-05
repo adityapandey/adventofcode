@@ -44,7 +44,7 @@ func main() {
 
 		if !ok && prevOk && nextOk {
 			fmt.Println(seatID)
-			return
+			break
 		}
 	}
 
