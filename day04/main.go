@@ -20,63 +20,6 @@ type passport struct {
 	kv map[string]string
 }
 
-func isValid(p passport) bool {
-	delete(p.kv, "cid")
-	return len(p.kv) == 7
-}
-
-func strictValid(p passport) bool {
-	if !isValid(p) {
-		return false
-	}
-	if !between(p.kv["byr"], 1920, 2002) {
-		return false
-	}
-	if !between(p.kv["iyr"], 2010, 2020) {
-		return false
-	}
-	if !between(p.kv["eyr"], 2020, 2030) {
-		return false
-	}
-	if !validHgt(p.kv["hgt"]) {
-		return false
-	}
-	if !hclRegexp.MatchString(p.kv["hcl"]) {
-		return false
-	}
-	if !eclRegexp.MatchString(p.kv["ecl"]) {
-		return false
-	}
-	if !pidRegexp.MatchString(p.kv["pid"]) {
-		return false
-	}
-	return true
-}
-
-func between(s string, min, max int) bool {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		return false
-	}
-	return i >= min && i <= max
-}
-
-func validHgt(s string) bool {
-	res := hgtRegexp.FindAllStringSubmatch(s, -1)
-	if len(res) != 1 {
-		return false
-	}
-	r := res[0]
-	switch r[2] {
-	case "cm":
-		return between(r[1], 150, 193)
-	case "in":
-		return between(r[1], 59, 76)
-	default:
-		return false
-	}
-}
-
 func main() {
 	var passports []passport
 	s := bufio.NewScanner(os.Stdin)
@@ -109,4 +52,44 @@ func main() {
 		}
 	}
 	fmt.Println(valid)
+}
+
+func isValid(p passport) bool {
+	delete(p.kv, "cid")
+	return len(p.kv) == 7
+}
+
+func strictValid(p passport) bool {
+	return isValid(p) &&
+		between(p.kv["byr"], 1920, 2002) &&
+		between(p.kv["iyr"], 2010, 2020) &&
+		between(p.kv["eyr"], 2020, 2030) &&
+		isValidHgt(p.kv["hgt"]) &&
+		hclRegexp.MatchString(p.kv["hcl"]) &&
+		eclRegexp.MatchString(p.kv["ecl"]) &&
+		pidRegexp.MatchString(p.kv["pid"])
+}
+
+func between(s string, min, max int) bool {
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		return false
+	}
+	return i >= min && i <= max
+}
+
+func isValidHgt(s string) bool {
+	res := hgtRegexp.FindAllStringSubmatch(s, -1)
+	if len(res) != 1 {
+		return false
+	}
+	r := res[0]
+	switch r[2] {
+	case "cm":
+		return between(r[1], 150, 193)
+	case "in":
+		return between(r[1], 59, 76)
+	default:
+		return false
+	}
 }
