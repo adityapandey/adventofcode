@@ -11,11 +11,11 @@ import (
 	"strings"
 )
 
-var kvRegexp = regexp.MustCompile("[^ ]+:[^ ]+")
-var hgtRegexp = regexp.MustCompile("^(\\d+)(cm|in)$")
-var hclRegexp = regexp.MustCompile("^#[0-9a-f]{6}$")
-var pidRegexp = regexp.MustCompile("^\\d{9}$")
-var eclRegexp = regexp.MustCompile("^amb|blu|brn|gry|grn|hzl|oth$")
+var kvRegexp = regexp.MustCompile(`[^ ]+:[^ ]+`)
+var hgtRegexp = regexp.MustCompile(`^(\d+)(cm|in)$`)
+var hclRegexp = regexp.MustCompile(`^#[0-9a-f]{6}$`)
+var pidRegexp = regexp.MustCompile(`^\d{9}$`)
+var eclRegexp = regexp.MustCompile(`^amb|blu|brn|gry|grn|hzl|oth$`)
 
 type passport struct {
 	kv map[string]string
