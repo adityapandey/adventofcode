@@ -2,8 +2,9 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
 	"regexp"
 	"strconv"
@@ -22,17 +23,19 @@ type passport struct {
 
 func main() {
 	var passports []passport
-	s := bufio.NewScanner(os.Stdin)
-	p := &passport{make(map[string]string)}
-	for s.Scan() {
-		if s.Text() == "" {
-			passports = append(passports, *p)
-			p = &passport{make(map[string]string)}
+	input, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, t := range strings.Split(string(input), "\n\n") {
+		p := passport{make(map[string]string)}
+		for _, line := range strings.Split(t, "\n") {
+			for _, kv := range kvRegexp.FindAllString(line, -1) {
+				kvSplit := strings.Split(kv, ":")
+				p.kv[kvSplit[0]] = kvSplit[1]
+			}
 		}
-		for _, kv := range kvRegexp.FindAllString(s.Text(), -1) {
-			split := strings.Split(kv, ":")
-			p.kv[split[0]] = split[1]
-		}
+		passports = append(passports, p)
 	}
 
 	// Part 1

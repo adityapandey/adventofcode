@@ -1,9 +1,11 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
+	"io/ioutil"
+	"log"
 	"os"
+	"strings"
 )
 
 type decl struct {
@@ -12,17 +14,17 @@ type decl struct {
 
 func main() {
 	var decls []decl
-	s := bufio.NewScanner(os.Stdin)
-	d := new(decl)
-	for s.Scan() {
-		if len(s.Text()) == 0 {
-			decls = append(decls, *d)
-			d = new(decl)
-			continue
-		}
-		d.ans = append(d.ans, s.Text())
+	input, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		log.Fatal(err)
 	}
-	decls = append(decls, *d)
+	for _, t := range strings.Split(string(input), "\n\n") {
+		var d decl
+		for _, line := range strings.Split(t, "\n") {
+			d.ans = append(d.ans, line)
+		}
+		decls = append(decls, d)
+	}
 
 	// Part 1
 	sum := 0
