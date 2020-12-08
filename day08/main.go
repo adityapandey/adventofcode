@@ -58,6 +58,18 @@ func (r *runner) step() {
 	}
 }
 
+func (r *runner) isLoop() bool {
+	visited := make(map[int]struct{})
+	for _, ok := visited[r.pc]; !ok; _, ok = visited[r.pc] {
+		visited[r.pc] = struct{}{}
+		r.step()
+		if _, validPC := r.program[r.pc]; !validPC {
+			return false
+		}
+	}
+	return true
+}
+
 func main() {
 	program := make(map[int]instruction)
 	s := bufio.NewScanner(os.Stdin)
@@ -72,10 +84,33 @@ func main() {
 
 	// Part 1
 	r := newRunner(program)
-	visited := make(map[int]struct{})
-	for _, ok := visited[r.pc]; !ok; _, ok = visited[r.pc] {
-		visited[r.pc] = struct{}{}
-		r.step()
+	if !r.isLoop() {
+		log.Fatal("Expected a loop!")
 	}
 	fmt.Println(r.accumulator)
+
+	// Part 2
+	var jmpOrNops []int
+	for k, v := range program {
+		if v.op != acc {
+			jmpOrNops = append(jmpOrNops, k)
+		}
+	}
+
+	for i := range jmpOrNops {
+		toggleJmpOrNop(program, jmpOrNops[i])
+		if i > 0 {
+			toggleJmpOrNop(program, jmpOrNops[i-1])
+		}
+		r := newRunner(program)
+		if !r.isLoop() {
+			fmt.Println(r.accumulator)
+		}
+	}
+}
+
+func toggleJmpOrNop(program map[int]instruction, key int) {
+	orig := program[key]
+	toggleOp := opcode(int(jmp) + int(nop) - int(orig.op))
+	program[key] = instruction{toggleOp, orig.arg}
 }
