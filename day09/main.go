@@ -41,8 +41,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	o := make([]int, j+1-i)
-	copy(o, input[i:j+1])
+	o := input[i : j+1]
 	sort.Ints(o)
 	fmt.Println(o[0] + o[len(o)-1])
 }
@@ -57,16 +56,15 @@ func sumFromSet(n int, m map[int]struct{}) bool {
 }
 
 func findRangeSum(n int, arr []int) (int, int, error) {
-	for i := 0; i < len(arr)-1; i++ {
-		sum := arr[i]
-		for j := i + 1; j < len(arr); j++ {
-			sum += arr[j]
-			if sum == n {
-				return i, j, nil
-			}
-			if sum > n {
-				break
-			}
+	var i, j, sum int
+	for ; j < len(arr); j++ {
+		sum += arr[j]
+		for sum > n && j > i {
+			sum -= arr[i]
+			i++
+		}
+		if sum == n {
+			return i, j, nil
 		}
 	}
 	return -1, -1, errors.New("No viable range")
