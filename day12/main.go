@@ -1,5 +1,4 @@
 // https://adventofcode.com/2020/day/12
-
 package main
 
 import (
