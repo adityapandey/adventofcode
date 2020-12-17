@@ -78,18 +78,8 @@ func iterate3(cube map[pt3]byte) map[pt3]byte {
 				numActive++
 			}
 		}
-		if cube[p] == '#' {
-			if numActive == 2 || numActive == 3 {
-				next[p] = '#'
-			} else {
-				next[p] = '.'
-			}
-		} else {
-			if numActive == 3 {
-				next[p] = '#'
-			} else {
-				next[p] = '.'
-			}
+		if cube[p] == '#' && numActive == 2 || numActive == 3 {
+			next[p] = '#'
 		}
 	}
 	return next
@@ -126,18 +116,8 @@ func iterate4(hypercube map[pt4]byte) map[pt4]byte {
 				numActive++
 			}
 		}
-		if hypercube[p] == '#' {
-			if numActive == 2 || numActive == 3 {
-				next[p] = '#'
-			} else {
-				next[p] = '.'
-			}
-		} else {
-			if numActive == 3 {
-				next[p] = '#'
-			} else {
-				next[p] = '.'
-			}
+		if hypercube[p] == '#' && numActive == 2 || numActive == 3 {
+			next[p] = '#'
 		}
 	}
 	return next
