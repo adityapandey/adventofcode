@@ -3,7 +3,6 @@ package main
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -20,71 +19,74 @@ func main() {
 	// Part 1
 	sum := 0
 	for _, e := range exprs {
-		sum += eval(e, [][]byte{{'+', '*'}})
+		sum += eval(e, map[byte]int{'*': 1, '+': 1})
 	}
 	fmt.Println(sum)
 
 	// Part 2
 	sum = 0
 	for _, e := range exprs {
-		sum += eval(e, [][]byte{{'+'}, {'*'}})
+		sum += eval(e, map[byte]int{'*': 1, '+': 2})
 	}
 	fmt.Println(sum)
 }
 
-func eval(expr []byte, precedence [][]byte) int {
-	var ops []byte
-	var vals []int
-	for i := 0; i < len(expr); i++ {
-		switch expr[i] {
-		case '+', '*':
-			ops = append(ops, expr[i])
+func eval(expr []byte, precedence map[byte]int) int {
+	var opStack []byte
+	var postfix []byte
+	for _, token := range expr {
+		switch token {
 		case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
-			vals = append(vals, ord(expr[i]))
+			postfix = append(postfix, token)
 		case '(':
-			end, err := findCloseParen(expr, i)
-			if err != nil {
-				log.Fatal(err)
+			opStack = append(opStack, token)
+		case ')':
+			for len(opStack) > 0 {
+				var op byte
+				op, opStack = opStack[len(opStack)-1], opStack[:len(opStack)-1]
+				if op == '(' {
+					break
+				}
+				postfix = append(postfix, op)
 			}
-			vals = append(vals, eval(expr[i+1:end], precedence))
-			i = end
+		case '+', '*':
+			for len(opStack) > 0 {
+				op := opStack[len(opStack)-1]
+				if op == '(' || precedence[token] > precedence[op] {
+					break
+				}
+				opStack = opStack[:len(opStack)-1]
+				postfix = append(postfix, op)
+			}
+			opStack = append(opStack, token)
 		}
 	}
-	for _, currOps := range precedence {
-		for i := 0; i < len(ops); i++ {
-			if !bytes.Contains(currOps, []byte{ops[i]}) {
-				continue
-			}
-			switch ops[i] {
-			case '+':
-				vals[i+1] = vals[i] + vals[i+1]
-			case '*':
-				vals[i+1] = vals[i] * vals[i+1]
-			}
-			vals = append(vals[:i], vals[i+1:]...)
-			ops = append(ops[:i], ops[i+1:]...)
-			i--
+	for len(opStack) > 0 {
+		postfix = append(postfix, opStack[len(opStack)-1])
+		opStack = opStack[:len(opStack)-1]
+	}
+	return evalPostfix(postfix)
+}
+
+func evalPostfix(postfix []byte) int {
+	var stack []int
+	for _, token := range postfix {
+		switch token {
+		case '+':
+			l := len(stack)
+			stack[l-2] += stack[l-1]
+			stack = stack[:l-1]
+		case '*':
+			l := len(stack)
+			stack[l-2] *= stack[l-1]
+			stack = stack[:l-1]
+		default:
+			stack = append(stack, ord(token))
 		}
 	}
-	return vals[0]
+	return stack[0]
 }
 
 func ord(b byte) int {
 	return int(b) - '0'
-}
-
-func findCloseParen(expr []byte, i int) (int, error) {
-	var parens int
-	for ; i < len(expr); i++ {
-		switch expr[i] {
-		case '(':
-			parens++
-		case ')':
-			parens--
-			if parens == 0 {
-				return i, nil
-			}
-		}
-	}
-	return -1, errors.New("No matching closing parenthesis")
 }
