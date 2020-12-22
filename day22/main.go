@@ -2,7 +2,6 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"hash/crc32"
 	"io/ioutil"
@@ -19,10 +18,10 @@ func main() {
 		log.Fatal(err)
 	}
 	players := strings.Split(string(input), "\n\n")
-	var decks [2][]int
+	var decks [2][]byte
 	for i := 0; i < 2; i++ {
 		for _, s := range strings.Split(players[i], "\n")[1:] {
-			decks[i] = append(decks[i], util.Atoi(s))
+			decks[i] = append(decks[i], byte(util.Atoi(s)))
 		}
 	}
 
@@ -35,9 +34,7 @@ func main() {
 	fmt.Println(score(deck))
 }
 
-var crc = crc32.NewIEEE()
-
-func combat(decks [2][]int, recurse bool) (int, []int) {
+func combat(decks [2][]byte, recurse bool) (winner int, deck []byte) {
 	seen := make(map[uint32]struct{})
 	for len(decks[0]) > 0 && len(decks[1]) > 0 {
 		h := hash(decks)
@@ -47,12 +44,12 @@ func combat(decks [2][]int, recurse bool) (int, []int) {
 		seen[h] = struct{}{}
 		card0, card1 := decks[0][0], decks[1][0]
 		var winner int
-		if card0 < len(decks[0]) && card1 < len(decks[1]) && recurse {
-			deck0 := make([]int, card0)
-			deck1 := make([]int, card1)
+		if int(card0) < len(decks[0]) && int(card1) < len(decks[1]) && recurse {
+			deck0 := make([]byte, card0)
+			deck1 := make([]byte, card1)
 			copy(deck0, decks[0][1:])
 			copy(deck1, decks[1][1:])
-			winner, _ = combat([2][]int{deck0, deck1}, recurse)
+			winner, _ = combat([2][]byte{deck0, deck1}, true)
 		} else {
 			if card0 > card1 {
 				winner = 0
@@ -74,24 +71,21 @@ func combat(decks [2][]int, recurse bool) (int, []int) {
 	return 0, decks[0]
 }
 
-func hash(decks [2][]int) uint32 {
-	var b bytes.Buffer
-	for i := 0; i < 2; i++ {
-		b.WriteByte(byte(100))
-		for _, c := range decks[i] {
-			b.WriteByte(byte(c))
-		}
-	}
+var crc = crc32.NewIEEE()
+
+func hash(decks [2][]byte) uint32 {
 	crc.Reset()
-	crc.Write(b.Bytes())
+	crc.Write(decks[0])
+	crc.Write([]byte{100}) // 100 does not occur in input
+	crc.Write(decks[1])
 	return crc.Sum32()
 }
 
-func score(a []int) int {
+func score(deck []byte) int {
 	score := 0
-	l := len(a)
-	for i, n := range a {
-		score += (l - i) * n
+	l := len(deck)
+	for i, c := range deck {
+		score += (l - i) * int(c)
 	}
 	return score
 }
