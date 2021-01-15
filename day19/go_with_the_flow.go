@@ -188,9 +188,6 @@ func main() {
 	fmt.Println(state[0])
 
 	// Part 2
-	// state = State{1, 0, 0, 0, 0, 0}
-	// ip = 0
-
 	// Intermediate states:
 	// state = State{0, 10551360, 0, 1, 4, 10551364}
 	// state = State{1, 5275678, 0, 2, 4, 10551364}
@@ -206,18 +203,16 @@ func main() {
 	// state = State{44, 10551360, 0, 38, 4, 10551364}
 	// state = State{44, 10551360, 0, 73, 4, 10551364}
 	// state = State{44, 142585, 0, 74, 4, 10551364}
-	// ip = 5
-	// for {
-	// 	state[ipReg] = ip
-	// 	line := program[ip]
-	// 	state = inst[line.opcode](state, line.i, line.o)
-	// 	ip = state[ipReg]
-	// 	ip++
-	// 	if ip > len(program) {
-	// 		break
-	// 	}
-	// 	fmt.Println(state, line, ip)
-	// }
+
+	state = State{1, 0, 0, 0, 0, 0}
+	ip = 0
+	for i := 0; i < 20; i++ {
+		state[ipReg] = ip
+		line := program[ip]
+		state = inst[line.opcode](state, line.i, line.o)
+		ip = state[ipReg]
+		ip++
+	}
 
 	// After several state changes,
 	//   - register 5 contains 10551364
@@ -241,7 +236,7 @@ func main() {
 
 	// This is a very slow program that sums all factors of 'f' in a.
 
-	f, sum := 10551364, 0
+	f, sum := state[5], 0
 	for i := 1; i < int(math.Floor(math.Sqrt(float64(f)))); i++ {
 		if f%i == 0 {
 			sum += i

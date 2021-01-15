@@ -182,10 +182,11 @@ func main() {
 	var state State
 	var ip int
 	var state0 int
+	eqrr0 := program[28].i[0]
 	for {
 		state[ipReg] = ip
 		if ip == 29 {
-			state0 = state[5]
+			state0 = state[eqrr0]
 			fmt.Println(state0)
 			break
 		}
@@ -210,12 +211,12 @@ func main() {
 		ip = state[ipReg]
 		ip++
 		if ip == 29 {
-			seen[state[5]]++
-			if seen[state[5]] == 2 {
+			seen[state[eqrr0]]++
+			if seen[state[eqrr0]] == 2 {
 				fmt.Println(lastseen)
 				break
 			}
-			lastseen = state[5]
+			lastseen = state[eqrr0]
 		}
 		if ip >= len(program) {
 			log.Fatal("program exit before executing last inst 29")

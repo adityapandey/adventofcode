@@ -298,7 +298,7 @@ func main() {
 			sumHP += u.HP
 		}
 	}
-	fmt.Println(round, sumHP, round*sumHP)
+	fmt.Println(round * sumHP)
 
 	// Part 2
 	for AP := 3; ; AP++ {
@@ -326,7 +326,7 @@ func main() {
 					sumHP += u.HP
 				}
 			}
-			fmt.Println(round, sumHP, round*sumHP)
+			fmt.Println(round * sumHP)
 			break
 		}
 	}
