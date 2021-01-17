@@ -7,23 +7,17 @@ import (
 	"os"
 )
 
-type group struct {
-	start, end, score int
-}
-
 type state int
 
 const (
-	NONE state = iota
-	GROUP
-	GARBAGE
+	none state = iota
+	group
+	garbage
 )
 
 func main() {
-	var groups []group
-	var stack []group
-	garbage := 0
-	st := NONE
+	var sumScore, currScore, garbageCount int
+	st := none
 	input, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
@@ -31,42 +25,37 @@ func main() {
 	for i := 0; i < len(input); i++ {
 		c := input[i]
 		switch st {
-		case NONE:
+		case none:
 			switch c {
 			case '{':
-				st = GROUP
-				stack = append(stack, group{start: i, score: 1})
+				st = group
+				currScore = 1
 			case '<':
-				st = GARBAGE
+				st = garbage
 			default:
 				log.Fatal(c)
 			}
-		case GROUP:
+		case group:
 			switch c {
 			case '{':
-				stack = append(stack, group{start: i, score: stack[len(stack)-1].score + 1})
+				currScore++
 			case '}':
-				stack[len(stack)-1].end = i
-				groups = append(groups, stack[len(stack)-1])
-				stack = stack[:len(stack)-1]
+				sumScore += currScore
+				currScore--
 			case '<':
-				st = GARBAGE
+				st = garbage
 			}
-		case GARBAGE:
+		case garbage:
 			switch c {
 			case '!':
 				i++
 			case '>':
-				st = GROUP
+				st = group
 			default:
-				garbage++
+				garbageCount++
 			}
 		}
 	}
-	sum := 0
-	for _, g := range groups {
-		sum += g.score
-	}
-	fmt.Println(sum)
-	fmt.Println(garbage)
+	fmt.Println(sumScore)
+	fmt.Println(garbageCount)
 }
