@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/adityapandey/adventofcode2017-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 var re = regexp.MustCompile(`(\w+) \((\d+)\)( -> (.+))*`)

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/adityapandey/adventofcode2017-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 type set map[int]struct{}

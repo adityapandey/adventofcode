@@ -6,7 +6,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/adityapandey/adventofcode2017-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 type particle struct {
@@ -26,12 +26,12 @@ func main() {
 	}
 	sort.Slice(particles,
 		func(i, j int) bool {
-			ai := util.ManhattanDistance3(particles[i].a, util.Pt3{0, 0, 0})
-			aj := util.ManhattanDistance3(particles[j].a, util.Pt3{0, 0, 0})
-			vi := util.ManhattanDistance3(particles[i].v, util.Pt3{0, 0, 0})
-			vj := util.ManhattanDistance3(particles[j].v, util.Pt3{0, 0, 0})
-			pi := util.ManhattanDistance3(particles[i].p, util.Pt3{0, 0, 0})
-			pj := util.ManhattanDistance3(particles[j].p, util.Pt3{0, 0, 0})
+			ai := util.Manhattan3(particles[i].a, util.Pt3{0, 0, 0})
+			aj := util.Manhattan3(particles[j].a, util.Pt3{0, 0, 0})
+			vi := util.Manhattan3(particles[i].v, util.Pt3{0, 0, 0})
+			vj := util.Manhattan3(particles[j].v, util.Pt3{0, 0, 0})
+			pi := util.Manhattan3(particles[i].p, util.Pt3{0, 0, 0})
+			pj := util.Manhattan3(particles[j].p, util.Pt3{0, 0, 0})
 			if ai == aj {
 				if vi == vj {
 					return pi < pj

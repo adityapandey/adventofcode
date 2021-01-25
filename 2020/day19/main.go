@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/adityapandey/adventofcode2020-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 func main() {

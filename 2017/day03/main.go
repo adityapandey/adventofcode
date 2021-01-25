@@ -5,7 +5,7 @@ import (
 	"image"
 	"os"
 
-	"github.com/adityapandey/adventofcode2017-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 var dirmap = map[int]image.Point{
@@ -57,6 +57,6 @@ func main() {
 			}
 		}
 	}
-	fmt.Println(util.ManhattanDistance(p, image.Pt(0, 0)))
+	fmt.Println(util.Manhattan(p, image.Pt(0, 0)))
 	fmt.Println(foundVal)
 }

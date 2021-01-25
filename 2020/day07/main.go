@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/adityapandey/adventofcode2020-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 var contentsRe = regexp.MustCompile(`(\d+) (\w+ \w+) bags?(, )?`)

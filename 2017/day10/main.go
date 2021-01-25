@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/adityapandey/adventofcode2017-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 func main() {

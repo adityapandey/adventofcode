@@ -8,7 +8,7 @@ import (
 	"os"
 	"regexp"
 
-	"github.com/adityapandey/adventofcode2017-go/util"
+	"github.com/adityapandey/adventofcode/util"
 )
 
 var re = regexp.MustCompile(`(\w+) (inc|dec) ([0-9-]+) if (\w+) (>|<|<=|>=|==|!=) ([0-9-]+)`)
