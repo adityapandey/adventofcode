@@ -5,23 +5,9 @@ import (
 	"fmt"
 	"image"
 	"os"
+
+	"github.com/adityapandey/adventofcode/util"
 )
-
-type dir int
-
-const (
-	S dir = iota
-	W
-	N
-	E
-)
-
-var dirs = map[dir]image.Point{
-	S: {0, 1},
-	W: {-1, 0},
-	N: {0, -1},
-	E: {1, 0},
-}
 
 func main() {
 	path := make(map[image.Point]byte)
@@ -41,7 +27,7 @@ func main() {
 		y++
 	}
 	var letters []byte
-	var d dir
+	d := util.S
 	var steps int
 	for {
 		steps++
@@ -49,7 +35,7 @@ func main() {
 		if d, ok = next(pos, d, path); !ok {
 			break
 		}
-		pos = pos.Add(dirs[d])
+		pos = pos.Add(d.PointR())
 		if path[pos] >= 'A' && path[pos] <= 'Z' {
 			letters = append(letters, path[pos])
 		}
@@ -58,9 +44,9 @@ func main() {
 	fmt.Println(steps)
 }
 
-func next(p image.Point, prevd dir, path map[image.Point]byte) (dir, bool) {
-	for _, d := range []dir{prevd, (prevd + 1) % 4, (prevd + 3) % 4} {
-		if _, ok := path[p.Add(dirs[d])]; ok {
+func next(p image.Point, prevd util.Dir, path map[image.Point]byte) (util.Dir, bool) {
+	for _, d := range []util.Dir{prevd, prevd.Next(), prevd.Prev()} {
+		if _, ok := path[p.Add(d.PointR())]; ok {
 			return d, true
 		}
 	}

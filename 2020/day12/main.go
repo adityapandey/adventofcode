@@ -6,18 +6,13 @@ import (
 	"fmt"
 	"image"
 	"os"
+
+	"github.com/adityapandey/adventofcode/util"
 )
 
 type instr struct {
 	action byte
 	val    int
-}
-
-var dirs = map[byte]image.Point{
-	'E': image.Pt(1, 0),
-	'S': image.Pt(0, 1),
-	'W': image.Pt(-1, 0),
-	'N': image.Pt(0, -1),
 }
 
 func main() {
@@ -31,26 +26,26 @@ func main() {
 	}
 
 	// Part 1
-	dir := dirs['E']
+	dir := util.E
 	ship := image.Pt(0, 0)
 	for _, in := range instructions {
 		switch in.action {
 		case 'R':
 			// always a multiple of 90
-			dir = clockwise(dir, in.val/90)
+			dir = dir.Add(in.val / 90)
 		case 'L':
 			// always a multiple of 90
-			dir = clockwise(dir, 3*in.val/90)
+			dir = dir.Add(3 * in.val / 90)
 		case 'N', 'S', 'E', 'W':
-			ship = ship.Add(dirs[in.action].Mul(in.val))
+			ship = ship.Add(util.DirFromByte(in.action).Point().Mul(in.val))
 		case 'F':
-			ship = ship.Add(dir.Mul(in.val))
+			ship = ship.Add(dir.Point().Mul(in.val))
 		}
 	}
-	fmt.Println(abs(ship.X) + abs(ship.Y))
+	fmt.Println(util.Manhattan(ship, image.Pt(0, 0)))
 
 	// Part 2
-	waypoint := image.Pt(10, -1)
+	waypoint := image.Pt(10, 1)
 	ship = image.Pt(0, 0)
 	for _, in := range instructions {
 		switch in.action {
@@ -61,24 +56,17 @@ func main() {
 			// always a multiple of 90
 			waypoint = clockwise(waypoint, 3*in.val/90)
 		case 'N', 'S', 'E', 'W':
-			waypoint = waypoint.Add(dirs[in.action].Mul(in.val))
+			waypoint = waypoint.Add(util.DirFromByte(in.action).Point().Mul(in.val))
 		case 'F':
 			ship = ship.Add(waypoint.Mul(in.val))
 		}
 	}
-	fmt.Println(abs(ship.X) + abs(ship.Y))
+	fmt.Println(util.Manhattan(ship, image.Pt(0, 0)))
 }
 
 func clockwise(p image.Point, turns int) image.Point {
 	for i := 0; i < turns%4; i++ {
-		p = image.Pt(-p.Y, p.X)
+		p = image.Pt(p.Y, -p.X)
 	}
 	return p
-}
-
-func abs(n int) int {
-	if n < 0 {
-		return -n
-	}
-	return n
 }

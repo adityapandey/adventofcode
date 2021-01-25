@@ -1,7 +1,10 @@
 package util
 
 import (
+	"bufio"
+	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 )
 
@@ -18,4 +21,16 @@ func Abs(n int) int {
 		return -n
 	}
 	return n
+}
+
+func ReadAll() string {
+	input, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(input)
+}
+
+func ScanAll() *bufio.Scanner {
+	return bufio.NewScanner(os.Stdin)
 }
