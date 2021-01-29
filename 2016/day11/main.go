@@ -140,43 +140,23 @@ func main() {
 	fmt.Println(findDepth(start))
 }
 
-type item struct {
-	s        state
-	priority int
-}
-
-type pqueue []*item
-
-func (pq pqueue) Len() int            { return len(pq) }
-func (pq pqueue) Less(i, j int) bool  { return pq[i].priority > pq[j].priority }
-func (pq pqueue) Swap(i, j int)       { pq[i], pq[j] = pq[j], pq[i] }
-func (pq *pqueue) Push(x interface{}) { *pq = append(*pq, x.(*item)) }
-func (pq *pqueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	old[n-1] = nil
-	*pq = old[:n-1]
-	return item
-}
-
 func findDepth(start state) int {
 	end := start.end().hash()
 	depth := map[uint64]int{start.hash(): 0}
-	remaining := pqueue{&item{start, 0}}
+	remaining := util.PQ{&util.Item{start, 0}}
 	heap.Init(&remaining)
 	for remaining.Len() > 0 {
-		i := heap.Pop(&remaining).(*item)
-		if i.s.hash() == end {
+		i := heap.Pop(&remaining).(*util.Item)
+		if i.Obj.(state).hash() == end {
 			break
 		}
-		currdepth := depth[i.s.hash()] + 1
-		for _, n := range i.s.next() {
+		currdepth := depth[i.Obj.(state).hash()] + 1
+		for _, n := range i.Obj.(state).next() {
 			h := n.hash()
 			if d, ok := depth[h]; !ok || currdepth < d {
 				depth[h] = currdepth
 				// heuristic from https://reddit.com/r/adventofcode/comments/5hoia9/2016_day_11_solutions/db1zbu0/
-				heap.Push(&remaining, &item{n, -currdepth + 6*len(n.floors[3])})
+				heap.Push(&remaining, &util.Item{n, -currdepth + 6*len(n.floors[3])})
 			}
 		}
 	}
