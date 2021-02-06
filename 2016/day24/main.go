@@ -66,7 +66,13 @@ func shortestPaths(grid map[image.Point]struct{}, poi map[int]image.Point) map[i
 
 func fewestSteps(paths map[int]map[int]int, start int, seen map[int]struct{}, ret bool) int {
 	seen[start] = struct{}{}
-	var steps []int
+	if len(seen) == len(paths) {
+		if ret {
+			return paths[start][0]
+		}
+		return 0
+	}
+	min := math.MaxInt16
 	for next := range paths[start] {
 		if _, ok := seen[next]; ok {
 			continue
@@ -76,15 +82,12 @@ func fewestSteps(paths map[int]map[int]int, start int, seen map[int]struct{}, re
 			newseen[k] = struct{}{}
 		}
 		newseen[next] = struct{}{}
-		steps = append(steps, fewestSteps(paths, next, newseen, ret)+paths[start][next])
-	}
-	if len(steps) == 0 {
-		if ret {
-			return paths[start][0]
+		steps := fewestSteps(paths, next, newseen, ret) + paths[start][next]
+		if steps < min {
+			min = steps
 		}
-		return 0
 	}
-	return min(steps)
+	return min
 }
 
 func min(a []int) int {
