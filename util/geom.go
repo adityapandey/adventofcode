@@ -38,6 +38,10 @@ var fromByte = map[byte]Dir{
 	'R': E,
 	'D': S,
 	'L': W,
+	'^': N,
+	'>': E,
+	'v': S,
+	'<': W,
 }
 
 func DirFromByte(b byte) Dir {
