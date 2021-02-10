@@ -3,6 +3,10 @@ package util
 import "image"
 
 var Neighbors4 = []image.Point{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}
+var Neighbors8 = []image.Point{
+	{0, 1}, {0, -1}, {1, 0}, {-1, 0},
+	{-1, -1}, {-1, 1}, {1, -1}, {1, 1},
+}
 
 func Manhattan(p, q image.Point) int {
 	return Abs(p.X-q.X) + Abs(p.Y-q.Y)
