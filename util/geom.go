@@ -1,6 +1,8 @@
 package util
 
-import "image"
+import (
+	"image"
+)
 
 var Neighbors4 = []image.Point{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}
 var Neighbors8 = []image.Point{
@@ -77,4 +79,12 @@ func (d Dir) Point() image.Point {
 
 func (d Dir) PointR() image.Point {
 	return pointReversed[d]
+}
+
+func Bounds(p []image.Point) image.Rectangle {
+	r := image.Rectangle{p[0], p[1]}
+	for i := 2; i < len(p); i++ {
+		r = r.Union(image.Rect(p[0].X, p[0].Y, p[i].X, p[i].Y))
+	}
+	return r.Bounds()
 }

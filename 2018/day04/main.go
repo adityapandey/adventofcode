@@ -1,67 +1,59 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
-	"os"
 	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"time"
+
+	"github.com/adityapandey/adventofcode/util"
 )
 
-type Roster struct {
-	t     time.Time
-	event string
+type event struct {
+	t   time.Time
+	msg string
 }
 
-func atoi(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
-}
+var eventRe = regexp.MustCompile(`^\[(.*)\] (.*)$`)
 
 func main() {
-	var roster []Roster
-	rosterRe := regexp.MustCompile(`^\[(.*)\] (.*)$`)
-	s := bufio.NewScanner(os.Stdin)
+	var events []event
+	s := util.ScanAll()
 	for s.Scan() {
-		fields := rosterRe.FindAllStringSubmatch(s.Text(), -1)[0]
+		fields := eventRe.FindAllStringSubmatch(s.Text(), -1)[0]
 		t, err := time.Parse("2006-01-02 15:04", fields[1])
 		if err != nil {
 			log.Fatal("Unable to parse ", fields[1], ": ", err)
 		}
-		roster = append(roster, Roster{t, fields[2]})
+		events = append(events, event{t, fields[2]})
 	}
-	sort.Slice(roster, func(i, j int) bool { return roster[i].t.Before(roster[j].t) })
+	sort.Slice(events, func(i, j int) bool { return events[i].t.Before(events[j].t) })
 
 	// (guardId, date) -> minutes slept
 	m := make(map[int]map[string][]int)
 	var date string
-	var guardId, startSleep int
-	for _, r := range roster {
+	var guardID, startSleep int
+	for _, e := range events {
 		switch {
-		case strings.HasPrefix(r.event, "Guard"):
-			fmt.Sscanf(r.event, "Guard #%d begins shift", &guardId)
-			if r.t.Hour() == 0 {
-				date = r.t.Format("01-02")
+		case strings.HasPrefix(e.msg, "Guard"):
+			fmt.Sscanf(e.msg, "Guard #%d begins shift", &guardID)
+			if e.t.Hour() == 0 {
+				date = e.t.Format("01-02")
 			} else {
-				date = r.t.Add(time.Hour).Format("01-02")
+				date = e.t.Add(time.Hour).Format("01-02")
 			}
-			if _, ok := m[guardId]; !ok {
-				m[guardId] = make(map[string][]int)
+			if _, ok := m[guardID]; !ok {
+				m[guardID] = make(map[string][]int)
 			}
-			m[guardId][date] = make([]int, 60, 60)
-		case r.event == "falls asleep":
-			startSleep = r.t.Minute()
-		case r.event == "wakes up":
-			endSleep := r.t.Minute()
+			m[guardID][date] = make([]int, 60, 60)
+		case e.msg == "falls asleep":
+			startSleep = e.t.Minute()
+		case e.msg == "wakes up":
+			endSleep := e.t.Minute()
 			for i := startSleep; i < endSleep; i++ {
-				m[guardId][date][i] = 1
+				m[guardID][date][i] = 1
 			}
 		}
 	}
@@ -76,12 +68,12 @@ func main() {
 			}
 		}
 		if slept > maxSlept {
-			maxSlept, guardId = slept, guard
+			maxSlept, guardID = slept, guard
 		}
 	}
 
 	sleepsPerMinute := make([]int, 60, 60)
-	for _, mins := range m[guardId] {
+	for _, mins := range m[guardID] {
 		for i := range mins {
 			sleepsPerMinute[i] += mins[i]
 		}
@@ -93,7 +85,7 @@ func main() {
 			maxSleepsPerMinute, minute = sleepsPerMinute[i], i
 		}
 	}
-	fmt.Println(guardId * minute)
+	fmt.Println(guardID * minute)
 
 	// Part 2
 	maxSleepsPerMinute, minute = 0, 0
@@ -106,10 +98,10 @@ func main() {
 		}
 		for i, sleep := range sleepsPerMinute {
 			if sleep > maxSleepsPerMinute {
-				maxSleepsPerMinute, guardId, minute = sleep, guard, i
+				maxSleepsPerMinute, guardID, minute = sleep, guard, i
 			}
 		}
 	}
 
-	fmt.Println(guardId * minute)
+	fmt.Println(guardID * minute)
 }

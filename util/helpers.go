@@ -2,7 +2,7 @@ package util
 
 import (
 	"bufio"
-	"io/ioutil"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -24,7 +24,7 @@ func Abs(n int) int {
 }
 
 func ReadAll() string {
-	input, err := ioutil.ReadAll(os.Stdin)
+	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
 		log.Fatal(err)
 	}

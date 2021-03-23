@@ -1,20 +1,18 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"log"
-	"os"
-	"strconv"
 	"strings"
+
+	"github.com/adityapandey/adventofcode/util"
 )
 
-type Node struct {
-	children []*Node
+type node struct {
+	children []*node
 	metadata []int
 }
 
-func (n *Node) Value() int {
+func (n *node) value() int {
 	sum := 0
 	if len(n.children) == 0 {
 		for _, m := range n.metadata {
@@ -24,22 +22,14 @@ func (n *Node) Value() int {
 	}
 	for _, m := range n.metadata {
 		if m > 0 && m <= len(n.children) {
-			sum += n.children[m-1].Value()
+			sum += n.children[m-1].value()
 		}
 	}
 	return sum
 }
 
-func atoi(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
-}
-
-func makeNode(vals []int, pos int) (*Node, int) {
-	n := &Node{}
+func makeNode(vals []int, pos int) (*node, int) {
+	n := &node{}
 	numChildren := vals[pos]
 	numMetadata := vals[pos+1]
 	pos += 2
@@ -55,7 +45,7 @@ func makeNode(vals []int, pos int) (*Node, int) {
 	return n, pos
 }
 
-func metadataSum(root *Node) int {
+func metadataSum(root *node) int {
 	sum := 0
 	for _, m := range root.metadata {
 		sum += m
@@ -68,17 +58,10 @@ func metadataSum(root *Node) int {
 
 func main() {
 	var vals []int
-	s := bufio.NewScanner(os.Stdin)
-	for s.Scan() {
-		fields := strings.Fields(s.Text())
-		for _, f := range fields {
-			vals = append(vals, atoi(f))
-		}
+	for _, f := range strings.Fields(util.ReadAll()) {
+		vals = append(vals, util.Atoi(f))
 	}
-
 	root, _ := makeNode(vals, 0)
-	// Part 1
 	fmt.Println(metadataSum(root))
-	// Part 2
-	fmt.Println(root.Value())
+	fmt.Println(root.value())
 }

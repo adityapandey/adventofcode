@@ -45,8 +45,6 @@ func maxScore(numPlayers, iterations int) int {
 func main() {
 	var numPlayers, iterations int
 	fmt.Fscanf(os.Stdin, "%d players; last marble is worth %d points", &numPlayers, &iterations)
-	// Part 1
 	fmt.Println(maxScore(numPlayers, iterations))
-	// Part 2
 	fmt.Println(maxScore(numPlayers, iterations*100))
 }
