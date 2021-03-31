@@ -1,20 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
 	"strings"
-)
 
-type Note struct {
-	prev string
-	next byte
-}
+	"github.com/adityapandey/adventofcode/util"
+)
 
 func main() {
 	notes := make(map[string]byte)
-	s := bufio.NewScanner(os.Stdin)
+	s := util.ScanAll()
 	s.Scan()
 	var initialState string
 	fmt.Sscanf(s.Text(), "initial state: %s", &initialState)
@@ -26,10 +21,9 @@ func main() {
 		notes[prev] = next
 	}
 
-	// Part 1
 	origin, start := 0, initialState
 	for i := 0; i < 20; i++ {
-		start, origin = generate(start, origin, &notes)
+		start, origin = generate(start, origin, notes)
 	}
 	var sum int
 	for i := 0; i < len(start); i++ {
@@ -39,19 +33,16 @@ func main() {
 	}
 	fmt.Println(sum)
 
-	// Part 2
 	origin, start = 0, initialState
 	var prevStart string
 	var generation, prevOrigin int
 	for prevStart != start {
 		generation++
 		prevStart, prevOrigin = start, origin
-		start, origin = generate(start, origin, &notes)
+		start, origin = generate(start, origin, notes)
 	}
-
 	finalGeneration := 50000000000
 	finalOrigin := (finalGeneration-generation)*(origin-prevOrigin) + origin
-
 	sum = 0
 	for i := 0; i < len(start); i++ {
 		if start[i] == '#' {
@@ -61,12 +52,12 @@ func main() {
 	fmt.Println(sum)
 }
 
-func generate(start string, origin int, notes *map[string]byte) (string, int) {
+func generate(start string, origin int, notes map[string]byte) (string, int) {
 	delta, start := padString(start)
 	origin += delta
 	next := make([]byte, len(start)-4)
 	for i := 0; i < len(start)-4; i++ {
-		next[i] = (*notes)[start[i:i+5]]
+		next[i] = notes[start[i:i+5]]
 	}
 	start = string(next)
 	origin -= 2

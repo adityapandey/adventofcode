@@ -2,18 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"strconv"
 )
-
-func atoi(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
-}
 
 func main() {
 	var grid int
@@ -22,14 +12,12 @@ func main() {
 	const S = 300
 	var arr [S][S]int
 
-	// Part 1
 	for x := 0; x < S; x++ {
 		for y := 0; y < S; y++ {
 			rack := x + 11
 			arr[x][y] = ((((rack*(y+1) + grid) * rack) / 100) % 10) - 5
 		}
 	}
-
 	var maxX, maxY, maxSum int
 	for x := 0; x < S-3; x++ {
 		for y := 0; y < S-3; y++ {
@@ -44,10 +32,8 @@ func main() {
 			}
 		}
 	}
-
 	fmt.Printf("%d,%d\n", maxX+1, maxY+1)
 
-	// Part 2
 	var sums [S][S]int
 	maxX, maxY, maxSum, maxSize := 0, 0, 0, 0
 	for size := 1; size <= S; size++ {
@@ -65,6 +51,5 @@ func main() {
 			}
 		}
 	}
-
 	fmt.Printf("%d,%d,%d\n", maxX+1, maxY+1, maxSize)
 }

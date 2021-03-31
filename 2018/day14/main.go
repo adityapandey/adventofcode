@@ -2,25 +2,17 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"strconv"
-)
 
-func atoi(s string) int {
-	i, err := strconv.Atoi(s)
-	if err != nil {
-		log.Fatal(err)
-	}
-	return i
-}
+	"github.com/adityapandey/adventofcode/util"
+)
 
 func main() {
 	var input string
 	fmt.Fscanf(os.Stdin, "%s", &input)
 
 	// Part 1
-	iters := atoi(input)
+	iters := util.Atoi(input)
 	scores := []int{3, 7}
 	i, j := 0, 1
 	for len(scores) < iters+11 {
