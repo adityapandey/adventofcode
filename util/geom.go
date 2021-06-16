@@ -15,8 +15,8 @@ func Manhattan(p, q image.Point) int {
 }
 
 func Bounds(p []image.Point) image.Rectangle {
-	r := image.Rectangle{p[0], p[1]}
-	for i := 2; i < len(p); i++ {
+	r := image.Rectangle{p[0], p[0]}
+	for i := 1; i < len(p); i++ {
 		r = r.Union(image.Rect(p[0].X, p[0].Y, p[i].X, p[i].Y))
 	}
 	return r.Bounds()
@@ -81,10 +81,12 @@ func (d Dir) Reverse() Dir {
 var point = map[Dir]image.Point{N: {0, 1}, E: {1, 0}, S: {0, -1}, W: {-1, 0}}
 var pointReversed = map[Dir]image.Point{N: {0, -1}, E: {1, 0}, S: {0, 1}, W: {-1, 0}}
 
+// Y-axis goes up.
 func (d Dir) Point() image.Point {
 	return point[d]
 }
 
+// Y-axis goes down.
 func (d Dir) PointR() image.Point {
 	return pointReversed[d]
 }
