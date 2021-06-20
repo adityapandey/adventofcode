@@ -4,138 +4,37 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/adityapandey/adventofcode/2018/machine"
 	"github.com/adityapandey/adventofcode/util"
 )
-
-type device struct {
-	r [4]int
-}
-
-type operation int
-
-const (
-	addr operation = iota
-	addi
-	mulr
-	muli
-	banr
-	bani
-	borr
-	bori
-	setr
-	seti
-	gtir
-	gtri
-	gtrr
-	eqir
-	eqri
-	eqrr
-)
-
-type instruction func(d *device, a, b, c int)
-
-var instructions = map[operation]instruction{
-	addr: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] + d.r[b]
-	},
-	addi: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] + b
-	},
-	mulr: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] * d.r[b]
-	},
-	muli: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] * b
-	},
-	banr: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] & d.r[b]
-	},
-	bani: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] & b
-	},
-	borr: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] | d.r[b]
-	},
-	bori: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a] | b
-	},
-	setr: func(d *device, a, b, c int) {
-		d.r[c] = d.r[a]
-	},
-	seti: func(d *device, a, b, c int) {
-		d.r[c] = a
-	},
-	gtir: func(d *device, a, b, c int) {
-		if a > d.r[b] {
-			d.r[c] = 1
-		} else {
-			d.r[c] = 0
-		}
-	},
-	gtri: func(d *device, a, b, c int) {
-		if d.r[a] > b {
-			d.r[c] = 1
-		} else {
-			d.r[c] = 0
-		}
-	},
-	gtrr: func(d *device, a, b, c int) {
-		if d.r[a] > d.r[b] {
-			d.r[c] = 1
-		} else {
-			d.r[c] = 0
-		}
-	},
-	eqir: func(d *device, a, b, c int) {
-		if a == d.r[b] {
-			d.r[c] = 1
-		} else {
-			d.r[c] = 0
-		}
-	},
-	eqri: func(d *device, a, b, c int) {
-		if d.r[a] == b {
-			d.r[c] = 1
-		} else {
-			d.r[c] = 0
-		}
-	},
-	eqrr: func(d *device, a, b, c int) {
-		if d.r[a] == d.r[b] {
-			d.r[c] = 1
-		} else {
-			d.r[c] = 0
-		}
-	},
-}
 
 func main() {
 	input := strings.Split(util.ReadAll(), "\n\n\n\n")
 	samples := strings.Split(input[0], "\n\n")
 	var sum3orMoreFits int
-	codeCanBeOp := make(map[int]map[operation]struct{})
-	codeCannotBeOp := make(map[int]map[operation]struct{})
+	codeCanBeOp := make(map[int]map[string]struct{})
+	codeCannotBeOp := make(map[int]map[string]struct{})
 	for _, s := range samples {
 		sp := strings.Split(s, "\n")
-		var before, after device
-		fmt.Sscanf(sp[0], "Before: [%d, %d, %d, %d]", &before.r[0], &before.r[1], &before.r[2], &before.r[3])
-		fmt.Sscanf(sp[2], "After:  [%d, %d, %d, %d]", &after.r[0], &after.r[1], &after.r[2], &after.r[3])
+		before, after := machine.New(4), machine.New(4)
+		fmt.Sscanf(sp[0], "Before: [%d, %d, %d, %d]", &before.R[0], &before.R[1], &before.R[2], &before.R[3])
+		fmt.Sscanf(sp[2], "After:  [%d, %d, %d, %d]", &after.R[0], &after.R[1], &after.R[2], &after.R[3])
 		var code, a, b, c int
 		fmt.Sscanf(sp[1], "%d %d %d %d", &code, &a, &b, &c)
 
 		var fits int
-		for o, i := range instructions {
-			d := before
-			i(&d, a, b, c)
-			if d == after {
+		for o, i := range machine.Instructions {
+			m := copyOf(before)
+			i(m, a, b, c)
+			if m.R[0] == after.R[0] && m.R[1] == after.R[1] && m.R[2] == after.R[2] && m.R[3] == after.R[3] {
 				fits++
 				if _, ok := codeCanBeOp[code]; !ok {
-					codeCanBeOp[code] = make(map[operation]struct{})
+					codeCanBeOp[code] = make(map[string]struct{})
 				}
 				codeCanBeOp[code][o] = struct{}{}
 			} else {
 				if _, ok := codeCannotBeOp[code]; !ok {
-					codeCannotBeOp[code] = make(map[operation]struct{})
+					codeCannotBeOp[code] = make(map[string]struct{})
 				}
 				codeCannotBeOp[code][o] = struct{}{}
 			}
@@ -146,7 +45,7 @@ func main() {
 	}
 	fmt.Println(sum3orMoreFits)
 
-	codeToOp := make(map[int]operation)
+	codeToOp := make(map[int]string)
 	for code := range codeCanBeOp {
 		for o := range codeCannotBeOp[code] {
 			delete(codeCanBeOp[code], o)
@@ -166,17 +65,25 @@ func main() {
 	}
 
 	prog := input[1]
-	var d device
+	m := machine.New(4)
 	for _, line := range strings.Split(prog, "\n") {
 		var code, a, b, c int
 		fmt.Sscanf(line, "%d %d %d %d", &code, &a, &b, &c)
-		i := instructions[codeToOp[code]]
-		i(&d, a, b, c)
+		m.Execute(codeToOp[code], a, b, c)
 	}
-	fmt.Println(d.r[0])
+	fmt.Println(m.R[0])
 }
 
-func getOnlyEntry(m map[operation]struct{}) operation {
+func copyOf(m *machine.Machine) *machine.Machine {
+	n := len(m.R)
+	c := machine.New(n)
+	for i := 0; i < n; i++ {
+		c.R[i] = m.R[i]
+	}
+	return c
+}
+
+func getOnlyEntry(m map[string]struct{}) string {
 	for op := range m {
 		return op
 	}
