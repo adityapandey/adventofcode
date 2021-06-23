@@ -38,15 +38,15 @@ func decode(n int) (op opcode, modes [3]mode) {
 type Machine struct {
 	data map[int]int
 	ip   int
-	in   []int
-	i    int
-	out  []int
+	in   <-chan int
+	out  chan<- int
 }
 
-func New(program []int, in []int) *Machine {
+func New(program []int, in <-chan int, out chan<- int) *Machine {
 	m := &Machine{
 		data: make(map[int]int),
 		in:   in,
+		out:  out,
 	}
 	for i, n := range program {
 		m.data[i] = n
@@ -82,11 +82,10 @@ func (m *Machine) Step() bool {
 		m.set(m.ip+3, val)
 		m.ip += 4
 	case input:
-		m.set(m.ip+1, m.in[m.i])
-		m.i++
+		m.set(m.ip+1, <-m.in)
 		m.ip += 2
 	case output:
-		m.out = append(m.out, m.get(m.ip+1, modes[0]))
+		m.out <- m.get(m.ip+1, modes[0])
 		m.ip += 2
 	case jt:
 		if m.get(m.ip+1, modes[0]) != 0 {
@@ -125,8 +124,12 @@ func (m *Machine) Step() bool {
 func (m *Machine) Run() {
 	for m.Step() {
 	}
+	close(m.out)
 }
 
-func (m *Machine) Output() []int {
-	return m.out
+func Run(program []int, in <-chan int) chan int {
+	out := make(chan int)
+	m := New(program, in, out)
+	go m.Run()
+	return out
 }
