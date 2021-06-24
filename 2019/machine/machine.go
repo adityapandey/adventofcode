@@ -1,7 +1,7 @@
 package machine
 
 import (
-	"log"
+	"fmt"
 )
 
 type mode int
@@ -9,6 +9,7 @@ type mode int
 const (
 	position mode = iota
 	immediate
+	relative
 )
 
 type opcode int
@@ -22,6 +23,7 @@ const (
 	jf
 	lt
 	eq
+	rbo
 	halt opcode = 99
 )
 
@@ -36,10 +38,11 @@ func decode(n int) (op opcode, modes [3]mode) {
 }
 
 type Machine struct {
-	data map[int]int
-	ip   int
-	in   <-chan int
-	out  chan<- int
+	data    map[int]int
+	ip      int
+	in      <-chan int
+	out     chan<- int
+	relbase int
 }
 
 func New(program []int, in <-chan int, out chan<- int) *Machine {
@@ -60,14 +63,23 @@ func (m *Machine) get(i int, mo mode) int {
 		return m.data[i]
 	case position:
 		return m.data[m.data[i]]
+	case relative:
+		return m.data[m.relbase+m.data[i]]
 	default:
-		log.Fatal("Unknown mode: ", mo)
+		panic(fmt.Sprintf("Unknown mode: %v", mo))
 	}
 	return 0
 }
 
-func (m *Machine) set(i int, val int) {
-	m.data[m.data[i]] = val
+func (m *Machine) set(i int, mo mode, val int) {
+	switch mo {
+	case position:
+		m.data[m.data[i]] = val
+	case relative:
+		m.data[m.relbase+m.data[i]] = val
+	default:
+		panic(fmt.Sprintf("Unknown mode: %v", mo))
+	}
 }
 
 func (m *Machine) Step() bool {
@@ -75,14 +87,14 @@ func (m *Machine) Step() bool {
 	switch op {
 	case add:
 		val := m.get(m.ip+1, modes[0]) + m.get(m.ip+2, modes[1])
-		m.set(m.ip+3, val)
+		m.set(m.ip+3, modes[2], val)
 		m.ip += 4
 	case mul:
 		val := m.get(m.ip+1, modes[0]) * m.get(m.ip+2, modes[1])
-		m.set(m.ip+3, val)
+		m.set(m.ip+3, modes[2], val)
 		m.ip += 4
 	case input:
-		m.set(m.ip+1, <-m.in)
+		m.set(m.ip+1, modes[0], <-m.in)
 		m.ip += 2
 	case output:
 		m.out <- m.get(m.ip+1, modes[0])
@@ -101,22 +113,25 @@ func (m *Machine) Step() bool {
 		}
 	case lt:
 		if m.get(m.ip+1, modes[0]) < m.get(m.ip+2, modes[1]) {
-			m.set(m.ip+3, 1)
+			m.set(m.ip+3, modes[2], 1)
 		} else {
-			m.set(m.ip+3, 0)
+			m.set(m.ip+3, modes[2], 0)
 		}
 		m.ip += 4
 	case eq:
 		if m.get(m.ip+1, modes[0]) == m.get(m.ip+2, modes[1]) {
-			m.set(m.ip+3, 1)
+			m.set(m.ip+3, modes[2], 1)
 		} else {
-			m.set(m.ip+3, 0)
+			m.set(m.ip+3, modes[2], 0)
 		}
 		m.ip += 4
+	case rbo:
+		m.relbase += m.get(m.ip+1, modes[0])
+		m.ip += 2
 	case halt:
 		return false
 	default:
-		log.Fatal("Unknown opcode: ", op)
+		panic(fmt.Sprintf("Unknown opcode: %v", op))
 	}
 	return true
 }
