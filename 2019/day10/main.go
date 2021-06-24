@@ -15,7 +15,7 @@ type slope struct {
 }
 
 func slopeFrom(p image.Point) slope {
-	g := gcd(p.X, p.Y)
+	g := util.Gcd(p.X, p.Y)
 	return slope{p.X / g, p.Y / g}
 }
 
@@ -115,15 +115,4 @@ func main() {
 	}
 	vaporized := asteroidsBySlope[r.Value.(slope)][0]
 	fmt.Println(vaporized.X*100 + vaporized.Y)
-}
-
-func gcd(a, b int) int {
-	a, b = util.Abs(a), util.Abs(b)
-	if a == 0 || b == 0 {
-		return a + b
-	}
-	for b != 0 {
-		a, b = b, a%b
-	}
-	return a
 }
