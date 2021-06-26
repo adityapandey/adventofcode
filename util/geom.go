@@ -46,25 +46,6 @@ const (
 	W
 )
 
-var fromByte = map[byte]Dir{
-	'N': N,
-	'E': E,
-	'S': S,
-	'W': W,
-	'U': N,
-	'R': E,
-	'D': S,
-	'L': W,
-	'^': N,
-	'>': E,
-	'v': S,
-	'<': W,
-}
-
-func DirFromByte(b byte) Dir {
-	return fromByte[b]
-}
-
 func (d Dir) Add(n int) Dir {
 	return Dir((int(d) + n) % 4)
 }
@@ -92,4 +73,36 @@ func (d Dir) Point() image.Point {
 // Y-axis goes down.
 func (d Dir) PointR() image.Point {
 	return pointReversed[d]
+}
+
+var fromPoint = map[image.Point]Dir{{0, 1}: N, {1, 0}: E, {0, -1}: S, {-1, 0}: W}
+var fromPointReversed = map[image.Point]Dir{{0, -1}: N, {1, 0}: E, {0, 1}: S, {-1, 0}: W}
+
+// Y-axis goes up.
+func DirFromPoint(p image.Point) Dir {
+	return fromPoint[p]
+}
+
+// Y-axis goes down.
+func DirFromPointR(p image.Point) Dir {
+	return fromPointReversed[p]
+}
+
+var fromByte = map[byte]Dir{
+	'N': N,
+	'E': E,
+	'S': S,
+	'W': W,
+	'U': N,
+	'R': E,
+	'D': S,
+	'L': W,
+	'^': N,
+	'>': E,
+	'v': S,
+	'<': W,
+}
+
+func DirFromByte(b byte) Dir {
+	return fromByte[b]
 }
