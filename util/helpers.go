@@ -3,7 +3,6 @@ package util
 import (
 	"bufio"
 	"io"
-	"log"
 	"os"
 	"strconv"
 )
@@ -11,7 +10,7 @@ import (
 func Atoi(s string) int {
 	n, err := strconv.Atoi(s)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return n
 }
@@ -55,11 +54,23 @@ func Lcm(a, b int) int {
 func ReadAll() string {
 	input, err := io.ReadAll(os.Stdin)
 	if err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
 	return string(input)
 }
 
 func ScanAll() *bufio.Scanner {
 	return bufio.NewScanner(os.Stdin)
+}
+
+func ReadFile(fn string) string {
+	f, err := os.Open(fn)
+	if err != nil {
+		panic(err)
+	}
+	input, err := io.ReadAll(f)
+	if err != nil {
+		panic(err)
+	}
+	return string(input)
 }
