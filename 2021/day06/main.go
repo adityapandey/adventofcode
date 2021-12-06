@@ -13,26 +13,22 @@ func main() {
 		fish[util.Atoi(n)]++
 	}
 	for i := 0; i < 80; i++ {
-		fish = step(fish)
+		step(fish)
 	}
 	fmt.Println(count(fish))
 	for i := 80; i < 256; i++ {
-		fish = step(fish)
+		step(fish)
 	}
 	fmt.Println(count(fish))
 }
 
-func step(s map[int]int) map[int]int {
-	m := map[int]int{}
-	for k, v := range s {
-		if k == 0 {
-			m[6] += v
-			m[8] += v
-		} else {
-			m[k-1] += v
-		}
+func step(fish map[int]int) {
+	births := fish[0]
+	for i := 1; i <= 8; i++ {
+		fish[i-1] = fish[i]
 	}
-	return m
+	fish[6] += births
+	fish[8] = births
 }
 
 func count(m map[int]int) int {
