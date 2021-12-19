@@ -10,15 +10,6 @@ import (
 	"github.com/adityapandey/adventofcode/util"
 )
 
-type state int
-
-const (
-	START state = iota
-	LIT
-	OP
-	END
-)
-
 type typeid int
 
 const (
@@ -36,7 +27,6 @@ type packet struct {
 	version    int
 	id         typeid
 	literal    int
-	lengthid   int
 	subpackets []packet
 }
 
@@ -79,23 +69,61 @@ func (p packet) value() int {
 	case GT:
 		if p.subpackets[0].value() > p.subpackets[1].value() {
 			return 1
-		} else {
-			return 0
 		}
+		return 0
 	case LT:
 		if p.subpackets[0].value() < p.subpackets[1].value() {
 			return 1
-		} else {
-			return 0
 		}
+		return 0
 	case EQ:
 		if p.subpackets[0].value() == p.subpackets[1].value() {
 			return 1
-		} else {
-			return 0
 		}
+		return 0
 	}
 	return 0
+}
+
+type parser struct {
+	b   []byte
+	pos int
+}
+
+func (p *parser) read(n int) []byte {
+	b := p.b[p.pos : p.pos+n]
+	p.pos += n
+	return b
+}
+
+func (p *parser) parse() packet {
+	var pkt packet
+	pkt.version = dec(p.read(3))
+	pkt.id = typeid(dec(p.read(3)))
+	switch pkt.id {
+	case LITERAL:
+		val := 0
+		more := byte('1')
+		for more == '1' {
+			more = p.read(1)[0]
+			val = val<<4 + dec(p.read(4))
+		}
+		pkt.literal = val
+	default:
+		switch p.read(1)[0] {
+		case '0':
+			length := dec(p.read(15))
+			currpos := p.pos
+			for p.pos < currpos+length {
+				pkt.subpackets = append(pkt.subpackets, p.parse())
+			}
+		case '1':
+			for n := dec(p.read(11)); n > 0; n-- {
+				pkt.subpackets = append(pkt.subpackets, p.parse())
+			}
+		}
+	}
+	return pkt
 }
 
 func main() {
@@ -104,119 +132,11 @@ func main() {
 	for _, c := range input {
 		b.Write(bin(c))
 	}
-	packets, err := parse(&b, 1)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(packets[0].versionSum())
-	fmt.Println(packets[0].value())
-}
 
-func read(r io.Reader, n int) ([]byte, error) {
-	b := make([]byte, n)
-	_, err := r.Read(b)
-	return b, err
-}
-
-func parse(r io.Reader, n int) ([]packet, error) {
-	var s state
-	var packets []packet
-	var p packet
-	var literal []byte
-	var done bool
-	for !done {
-		switch s {
-		case START:
-			p = packet{}
-			b, err := read(r, 3)
-			if err != nil {
-				if err == io.EOF && n <= 0 {
-					done = true
-					break
-				}
-				return nil, err
-			}
-			p.version = dec(b)
-
-			b, err = read(r, 3)
-			if err != nil {
-				return nil, err
-			}
-			p.id = typeid(dec(b))
-
-			switch p.id {
-			case LITERAL:
-				s = LIT
-			default:
-				s = OP
-			}
-		case LIT:
-			b, err := read(r, 1)
-			if err != nil {
-				return nil, err
-			}
-			l, err := read(r, 4)
-			switch b[0] {
-			case '1':
-				if err != nil {
-					return nil, err
-				}
-				literal = append(literal, l...)
-				s = LIT
-			case '0':
-				if err != nil && err != io.EOF {
-					return nil, err
-				}
-				literal = append(literal, l...)
-				p.literal = dec(literal)
-				literal = []byte{}
-				s = END
-			}
-		case OP:
-			b, err := read(r, 1)
-			if err != nil {
-				return nil, err
-			}
-			p.lengthid = dec(b)
-			switch p.lengthid {
-			case 0:
-				b, err := read(r, 15)
-				if err != nil {
-					return nil, err
-				}
-				sublength := dec(b)
-				b, err = read(r, sublength)
-				if err != nil {
-					return nil, err
-				}
-				subpackets, err := parse(bytes.NewBuffer(b), -1)
-				if err != nil {
-					return nil, err
-				}
-				p.subpackets = append(p.subpackets, subpackets...)
-			case 1:
-				b, err := read(r, 11)
-				if err != nil {
-					return nil, err
-				}
-				subpackets, err := parse(r, dec(b))
-				if err != nil {
-					return nil, err
-				}
-				p.subpackets = append(p.subpackets, subpackets...)
-			}
-			s = END
-		case END:
-			packets = append(packets, p)
-			n--
-			if n == 0 {
-				done = true
-			} else {
-				s = START
-			}
-		}
-	}
-	return packets, nil
+	parser2 := &parser{b.Bytes(), 0}
+	pkt := parser2.parse()
+	fmt.Println(pkt.versionSum())
+	fmt.Println(pkt.value())
 }
 
 func bin(c byte) []byte {
