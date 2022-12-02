@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"image"
 	"math"
+	"sort"
 
 	"github.com/adityapandey/adventofcode/util"
-	"go4.org/sort"
 )
 
 type slope struct {
