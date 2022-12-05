@@ -29,7 +29,5 @@ func isContained(start1, end1, start2, end2 int) bool {
 }
 
 func isOverlapping(start1, end1, start2, end2 int) bool {
-	return isContained(start1, end1, start2, end2) ||
-		(start1 >= start2 && start1 <= end2) ||
-		(end1 >= start2 && end1 <= end2)
+	return start1 <= end2 && end1 >= start2
 }
