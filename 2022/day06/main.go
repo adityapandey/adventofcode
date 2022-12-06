@@ -15,7 +15,7 @@ func main() {
 func firstNUnique(s string, n int) int {
 	for i := n; i < len(s); i++ {
 		b := []byte(s[i-n : i])
-		if len(b) == len(util.SetOf(b).Values()) {
+		if len(b) == len(util.SetOf(b)) {
 			return i
 		}
 	}
