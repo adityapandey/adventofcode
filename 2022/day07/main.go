@@ -8,21 +8,11 @@ import (
 	"github.com/adityapandey/adventofcode/util"
 )
 
-type dir struct {
-	path    string
-	parent  *dir
-	subdirs map[string]*dir
-	files   []int
-}
-
 func main() {
-	root := &dir{
-		path:    "",
-		parent:  nil,
-		subdirs: map[string]*dir{},
-		files:   []int{},
-	}
-	var curr *dir
+	root := []string{""}
+	dirs := map[string]int{}
+	files := map[string]int{}
+	var curr []string
 	s := util.ScanAll()
 	for s.Scan() {
 		txt := strings.Fields(s.Text())
@@ -31,33 +21,29 @@ func main() {
 				if txt[2] == "/" {
 					curr = root
 				} else if txt[2] == ".." {
-					curr = curr.parent
+					curr = curr[:len(curr)-1]
 				} else {
-					curr = curr.subdirs[txt[2]]
+					curr = append(curr, txt[2])
 				}
+				dirs[strings.Join(curr, "/")] = 0
 			}
 		} else {
-			if txt[0] == "dir" {
-				dirname := txt[1]
-				d := &dir{
-					path:    curr.path + "/" + dirname,
-					parent:  curr,
-					subdirs: map[string]*dir{},
-					files:   []int{},
-				}
-				curr.subdirs[dirname] = d
-			} else {
-				curr.files = append(curr.files, util.Atoi(txt[0]))
+			if txt[0] != "dir" {
+				files[strings.Join(append(curr, txt[1]), "/")] = util.Atoi(txt[0])
 			}
 		}
 	}
 
-	dirsizes := map[string]int{}
-	computeSize(root, dirsizes)
+	for f, s := range files {
+		path := strings.Split(f, "/")
+		for i := 1; i < len(path); i++ {
+			dirs[strings.Join(path[:i], "/")] += s
+		}
+	}
 
 	var sortedSizes []int
 	sum := 0
-	for _, s := range dirsizes {
+	for _, s := range dirs {
 		sortedSizes = append(sortedSizes, s)
 		if s <= 100000 {
 			sum += s
@@ -67,21 +53,6 @@ func main() {
 
 	sort.Ints(sortedSizes)
 	total, want := 70000000, 30000000
-	available := total - dirsizes[root.path]
+	available := total - dirs[""]
 	fmt.Println(sortedSizes[sort.SearchInts(sortedSizes, want-available)])
-}
-
-func computeSize(d *dir, dirsizes map[string]int) int {
-	if s, ok := dirsizes[d.path]; ok {
-		return s
-	}
-	s := 0
-	for _, f := range d.files {
-		s += f
-	}
-	for _, sd := range d.subdirs {
-		s += computeSize(sd, dirsizes)
-	}
-	dirsizes[d.path] = s
-	return s
 }
