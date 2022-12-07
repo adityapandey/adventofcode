@@ -8,16 +8,11 @@ import (
 	"github.com/adityapandey/adventofcode/util"
 )
 
-type file struct {
-	name string
-	size int
-}
-
 type dir struct {
 	path    string
 	parent  *dir
 	subdirs map[string]*dir
-	files   []file
+	files   []int
 }
 
 func main() {
@@ -25,70 +20,68 @@ func main() {
 		path:    "",
 		parent:  nil,
 		subdirs: map[string]*dir{},
-		files:   []file{},
+		files:   []int{},
 	}
 	var curr *dir
 	s := util.ScanAll()
 	for s.Scan() {
-		f := strings.Fields(s.Text())
-		if f[0] == "$" {
-			if f[1] == "cd" {
-				if f[2] == "/" {
+		txt := strings.Fields(s.Text())
+		if txt[0] == "$" {
+			if txt[1] == "cd" {
+				if txt[2] == "/" {
 					curr = root
-				} else if f[2] == ".." {
+				} else if txt[2] == ".." {
 					curr = curr.parent
 				} else {
-					curr = curr.subdirs[f[2]]
+					curr = curr.subdirs[txt[2]]
 				}
 			}
 		} else {
-			if f[0] == "dir" {
+			if txt[0] == "dir" {
+				dirname := txt[1]
 				d := &dir{
-					path:    curr.path + "/" + f[1],
+					path:    curr.path + "/" + dirname,
 					parent:  curr,
 					subdirs: map[string]*dir{},
-					files:   []file{},
+					files:   []int{},
 				}
-				curr.subdirs[f[1]] = d
+				curr.subdirs[dirname] = d
 			} else {
-				curr.files = append(curr.files, file{
-					name: f[1],
-					size: util.Atoi(f[0]),
-				})
+				curr.files = append(curr.files, util.Atoi(txt[0]))
 			}
 		}
 	}
 
-	dirs := map[string]int{}
-	computeSize(root, dirs)
+	dirsizes := map[string]int{}
+	computeSize(root, dirsizes)
 
-	var dirsizes []int
+	var sortedSizes []int
 	sum := 0
-	for _, s := range dirs {
-		dirsizes = append(dirsizes, s)
+	for _, s := range dirsizes {
+		sortedSizes = append(sortedSizes, s)
 		if s <= 100000 {
 			sum += s
 		}
 	}
 	fmt.Println(sum)
 
+	sort.Ints(sortedSizes)
 	total, want := 70000000, 30000000
-	available := total - dirs[root.path]
-	sort.Ints(dirsizes)
-	fmt.Println(dirsizes[sort.SearchInts(dirsizes, want-available)])
+	available := total - dirsizes[root.path]
+	fmt.Println(sortedSizes[sort.SearchInts(sortedSizes, want-available)])
 }
 
-func computeSize(d *dir, dirs map[string]int) int {
-	if s, ok := dirs[d.path]; ok {
+func computeSize(d *dir, dirsizes map[string]int) int {
+	if s, ok := dirsizes[d.path]; ok {
 		return s
 	}
 	s := 0
 	for _, f := range d.files {
-		s += f.size
+		s += f
 	}
 	for _, sd := range d.subdirs {
-		s += computeSize(sd, dirs)
+		s += computeSize(sd, dirsizes)
 	}
-	dirs[d.path] = s
+	dirsizes[d.path] = s
 	return s
 }
