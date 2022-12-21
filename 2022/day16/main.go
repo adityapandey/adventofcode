@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/adityapandey/adventofcode/util"
@@ -52,8 +51,27 @@ func main() {
 			open = append(open, v.id)
 		}
 	}
-	sort.Strings(open)
+
 	fmt.Println(maxPressure(valves, "AA", 30, 0, open, 0))
+
+	max := 0
+	for _, d := range divide(len(open)) {
+		if len(d[0]) == 0 || len(d[1]) == 0 {
+			continue
+		}
+		mine := make([]string, len(d[0]))
+		for i := range d[0] {
+			mine[i] = open[d[0][i]]
+		}
+		elephant := make([]string, len(d[1]))
+		for i := range d[1] {
+			elephant[i] = open[d[1][i]]
+		}
+
+		x := maxPressure(valves, "AA", 26, 0, mine, 0) + maxPressure(valves, "AA", 26, 0, elephant, 0)
+		max = util.Max(max, x)
+	}
+	fmt.Println(max)
 }
 
 func maxPressure(valves map[string]valve, curr string, minute int, pressure int, open []string, d int) int {
@@ -71,4 +89,20 @@ func maxPressure(valves map[string]valve, curr string, minute int, pressure int,
 		}
 	}
 	return max
+}
+
+func divide(l int) [][2][]int {
+	if l == 1 {
+		return [][2][]int{
+			{{}, {0}},
+			{{0}, {}},
+		}
+	}
+	d := divide(l - 1)
+	r := make([][2][]int, 2*len(d))
+	for i := range d {
+		r[2*i] = [2][]int{append([]int{l - 1}, d[i][0]...), d[i][1]}
+		r[2*i+1] = [2][]int{d[i][0], append([]int{l - 1}, d[i][1]...)}
+	}
+	return r
 }
