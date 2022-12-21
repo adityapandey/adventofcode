@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/adityapandey/adventofcode/util"
@@ -45,27 +46,28 @@ func main() {
 			}
 		}
 	}
-	open := util.Set[string]{}
+	open := []string{}
 	for _, v := range valves {
 		if v.flow > 0 {
-			open[v.id] = struct{}{}
+			open = append(open, v.id)
 		}
 	}
-
+	sort.Strings(open)
 	fmt.Println(maxPressure(valves, "AA", 30, 0, open, 0))
 }
 
-func maxPressure(valves map[string]valve, curr string, minute int, pressure int, open util.Set[string], d int) int {
+func maxPressure(valves map[string]valve, curr string, minute int, pressure int, open []string, d int) int {
 	max := pressure
-	for v := range open {
-		newopen := util.Set[string]{}
-		for k := range open {
-			newopen[k] = struct{}{}
+	for _, next := range open {
+		newopen := make([]string, 0, len(open)-1)
+		for _, v := range open {
+			if v != next {
+				newopen = append(newopen, v)
+			}
 		}
-		delete(newopen, v)
-		timeLeft := minute - valves[curr].tunnels[v] - 1
+		timeLeft := minute - valves[curr].tunnels[next] - 1
 		if timeLeft > 0 {
-			max = util.Max(max, maxPressure(valves, v, timeLeft, timeLeft*valves[v].flow+pressure, newopen, d+1))
+			max = util.Max(max, maxPressure(valves, next, timeLeft, timeLeft*valves[next].flow+pressure, newopen, d+1))
 		}
 	}
 	return max
