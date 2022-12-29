@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"io"
+	"math"
 	"os"
 	"strconv"
 )
@@ -32,18 +33,24 @@ func Sign(n int) int {
 	return 1
 }
 
-func Max(m, n int) int {
-	if m > n {
-		return m
+func Max(n ...int) int {
+	max := 0
+	for i := range n {
+		if n[i] > max {
+			max = n[i]
+		}
 	}
-	return n
+	return max
 }
 
-func Min(m, n int) int {
-	if m < n {
-		return m
+func Min(n ...int) int {
+	min := math.MaxInt
+	for i := range n {
+		if n[i] < min {
+			min = n[i]
+		}
 	}
-	return n
+	return min
 }
 
 func Gcd(a, b int) int {
