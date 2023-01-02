@@ -15,9 +15,9 @@ func Manhattan(p, q image.Point) int {
 }
 
 func Bounds(p []image.Point) image.Rectangle {
-	r := image.Rectangle{p[0], p[0]}
-	for i := 1; i < len(p); i++ {
-		r = r.Union(image.Rect(p[0].X, p[0].Y, p[i].X, p[i].Y))
+	var r image.Rectangle
+	for _, pp := range p {
+		r = r.Union(image.Rectangle{pp, pp.Add(image.Pt(1, 1))})
 	}
 	return r.Bounds()
 }
